@@ -1,95 +1,109 @@
-import Image from "next/image";
+'use client';
+
+import { useEffect } from "react";
 import styles from "./page.module.css";
 
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+export default function SnakeGame() {
+  useEffect(() => {
+    const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d');
+    const gridSize = 20;
+    const speed = 5; // grid cells per second
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+    let snake = [{ x: 160, y: 160 }];
+    let direction = { x: 1, y: 0 }; // normalized direction
+    let food = { x: 200, y: 200 };
+    let lastUpdate = 0;
+    let moveAccumulator = 0;
+
+    const draw = () => {
+      ctx!.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw food
+      ctx!.fillStyle = 'blueviolet';
+      ctx!.fillRect(food.x, food.y, gridSize, gridSize);
+
+      // Draw snake
+      ctx!.fillStyle = 'red';
+      snake.forEach(segment => {
+        ctx!.fillRect(segment.x, segment.y, gridSize, gridSize);
+      });
+    };
+
+    const update = () => {
+      const head = {
+        x: snake[0].x + direction.x * gridSize,
+        y: snake[0].y + direction.y * gridSize,
+      };
+      snake.unshift(head);
+
+      // Eat food
+      if (head.x === food.x && head.y === food.y) {
+        food = {
+          x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize,
+          y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize,
+        };
+      } else {
+        snake.pop();
+      }
+
+      // Collision
+      if (
+        head.x < 0 || head.x >= canvas.width ||
+        head.y < 0 || head.y >= canvas.height ||
+        snake.slice(1).some(seg => seg.x === head.x && seg.y === head.y)
+      ) {
+        alert('Game Over!');
+        snake = [{ x: 160, y: 160 }];
+        direction = { x: 1, y: 0 };
+      }
+
+      draw();
+    };
+
+    const handleKey = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowUp': direction = { x: 0, y: -1 }; break;
+        case 'ArrowDown': direction = { x: 0, y: 1 }; break;
+        case 'ArrowLeft': direction = { x: -1, y: 0 }; break;
+        case 'ArrowRight': direction = { x: 1, y: 0 }; break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKey);
+
+    const gameLoop = (timestamp: number) => {
+      if (!lastUpdate) lastUpdate = timestamp;
+      const delta = (timestamp - lastUpdate) / 1000; // seconds
+      lastUpdate = timestamp;
+
+      moveAccumulator += delta;
+      if (moveAccumulator >= 1 / speed) {
+        update();
+        moveAccumulator = 0;
+      }
+
+      requestAnimationFrame(gameLoop);
+    };
+
+    requestAnimationFrame(gameLoop);
+
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, []);
+
+  return (
+    <div className={styles.page}
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <canvas id="gameCanvas" width={640} height={480}
+        style={{
+          border: '1px solid white',
+        }}></canvas>
     </div>
   );
 }
