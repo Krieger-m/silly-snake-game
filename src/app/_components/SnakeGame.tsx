@@ -19,6 +19,7 @@ export default function SnakeGame() {
     let moveAccumulator = 0;
     let animationFrameId: number;
     let currentScore = 0;
+    let isPaused = false;
 
     const draw = () => {
       ctx!.clearRect(0, 0, canvas.width, canvas.height);
@@ -35,6 +36,16 @@ export default function SnakeGame() {
       snake.forEach(segment => {
         ctx!.fillRect(segment.x, segment.y, gridSize, gridSize);
       });
+    };
+
+    const drawPausedScreen = () => {
+      ctx!.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx!.fillRect(0, 0, canvas.width, canvas.height);
+      ctx!.fillStyle = 'white';
+      ctx!.font = '40px Arial';
+      ctx!.textAlign = 'center';
+      ctx!.textBaseline = 'middle';
+      ctx!.fillText('Paused', canvas.width / 2, canvas.height / 2);
     };
 
     const update = () => {
@@ -73,6 +84,21 @@ export default function SnakeGame() {
     };
 
     const handleKey = (e: KeyboardEvent) => {
+      // Toggle pause state with Space or 'p' key
+      if (e.key === ' ' || e.key.toLowerCase() === 'p') {
+        e.preventDefault(); // Prevent spacebar from scrolling the page
+        isPaused = !isPaused;
+        if (!isPaused) {
+          // To avoid a large jump in time when unpausing
+          lastUpdate = performance.now();
+          animationFrameId = requestAnimationFrame(gameLoop);
+        }
+        return;
+      }
+
+      // Ignore movement keys if the game is paused
+      if (isPaused) return;
+
       switch (e.key) {
         case 'ArrowUp':
           if (direction.y === 0) direction = { x: 0, y: -1 };
@@ -92,6 +118,12 @@ export default function SnakeGame() {
     document.addEventListener('keydown', handleKey);
 
     const gameLoop = (timestamp: number) => {
+      if (isPaused) {
+        drawPausedScreen();
+        // Stop the game loop until unpaused
+        return;
+      }
+
       if (!lastUpdate) lastUpdate = timestamp;
       const delta = (timestamp - lastUpdate) / 1000; // seconds
       lastUpdate = timestamp;
@@ -120,6 +152,9 @@ export default function SnakeGame() {
         style={{
           border: '1px solid white',
         }}></canvas>
+        <br />
+        <br />
+        <p style={{textAlign: 'center'}}>press SPACE to pause</p>
     </div>
   );
 }
