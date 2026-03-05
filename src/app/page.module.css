@@ -27,6 +27,23 @@
   }
 }
 
+.centerContent {
+  /* These styles override the grid layout from .page to center content simply */
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+
+.buttonLink {
+  border: 3px solid white;
+  border-radius: 5px;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
 .main {
   display: flex;
   flex-direction: column;
@@ -117,6 +134,10 @@ a.secondary {
   a.secondary:hover {
     background: var(--button-secondary-hover);
     border-color: transparent;
+  }
+
+  .buttonLink:hover {
+    background: var(--button-secondary-hover);
   }
 
   .footer a:hover {

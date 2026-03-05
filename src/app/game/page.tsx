@@ -7,15 +7,12 @@ import Link from "next/link";
 export default function GamePage() {
   return (
     <div
-      className={styles.page}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
+      className={`${styles.page} ${styles.centerContent}`}
     >
       <SnakeGame />
-      <a href={"/"}><div style={{border: "3px solid white", borderRadius: 5, padding: 10}}>Back</div></a>
+      <Link href={"/"} className={styles.buttonLink}>
+        Back
+      </Link>
     </div>
   );
 }
