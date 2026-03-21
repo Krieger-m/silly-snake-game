@@ -4,8 +4,8 @@ import { useEffect, useState, useRef } from "react";
 
 // --- Constants ---
 const GRID_SIZE = 20;
-const CANVAS_WIDTH = 640;
-const CANVAS_HEIGHT = 480;
+const DEFAULT_CANVAS_WIDTH = 640;
+const DEFAULT_CANVAS_HEIGHT = 480;
 const GAME_SPEED = 5; // cells per second
 
 const SNAKE_COLOR_START = '#9cb3c9';
@@ -25,6 +25,7 @@ type Direction = { x: -1 | 0 | 1; y: -1 | 0 | 1 };
 export default function SnakeGame() {
   const [score, setScore] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [dimensions, setDimensions] = useState({ width: DEFAULT_CANVAS_WIDTH, height: DEFAULT_CANVAS_HEIGHT });
 
   // Use refs for mutable game state that shouldn't trigger re-renders.
   const gameState = useRef({
@@ -34,6 +35,30 @@ export default function SnakeGame() {
     isPaused: false,
     isGameOver: false,
   });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768; // Mobile breakpoint
+      if (isMobile) {
+        // Narrower width, larger height for mobile
+        let newWidth = Math.min(window.innerWidth - 32, 400); // Leave some margin
+        // Snap to grid
+        newWidth = Math.floor(newWidth / GRID_SIZE) * GRID_SIZE;
+
+        // Use ~65% of screen height or at least 500px, but don't exceed reasonable max
+        let newHeight = Math.max(Math.floor((window.innerHeight * 0.65) / GRID_SIZE) * GRID_SIZE, 500);
+        newHeight = Math.min(newHeight, 800); // Cap height
+
+        setDimensions({ width: newWidth, height: newHeight });
+      } else {
+        setDimensions({ width: DEFAULT_CANVAS_WIDTH, height: DEFAULT_CANVAS_HEIGHT });
+      }
+    };
+
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -47,8 +72,8 @@ export default function SnakeGame() {
     let currentScore = 0;
 
     const getRandomFoodPosition = (): Point => ({
-      x: Math.floor(Math.random() * (CANVAS_WIDTH / GRID_SIZE)) * GRID_SIZE,
-      y: Math.floor(Math.random() * (CANVAS_HEIGHT / GRID_SIZE)) * GRID_SIZE,
+      x: Math.floor(Math.random() * (canvas.width / GRID_SIZE)) * GRID_SIZE,
+      y: Math.floor(Math.random() * (canvas.height / GRID_SIZE)) * GRID_SIZE,
     });
 
     const draw = () => {
@@ -92,8 +117,12 @@ export default function SnakeGame() {
     };
 
     const restartGame = () => {
+      // Start in the center
+      const startX = Math.floor(canvas.width / 2 / GRID_SIZE) * GRID_SIZE;
+      const startY = Math.floor(canvas.height / 2 / GRID_SIZE) * GRID_SIZE;
+
       gameState.current = {
-        snake: [{ x: 160, y: 160 }],
+        snake: [{ x: startX, y: startY }],
         direction: { x: 1, y: 0 },
         food: getRandomFoodPosition(),
         isPaused: false,
@@ -258,8 +287,8 @@ export default function SnakeGame() {
       animationFrameId = requestAnimationFrame(gameLoop);
     };
 
-    gameState.current.food = getRandomFoodPosition();
-    animationFrameId = requestAnimationFrame(gameLoop);
+    // Initialize/Restart on mount or dimension change
+    restartGame();
 
     return () => {
       document.removeEventListener('keydown', handleKey);
@@ -268,12 +297,12 @@ export default function SnakeGame() {
       canvas.removeEventListener('touchend', handleTouchEnd);
       cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [dimensions]);
 
   return (
     <div>
       <div style={{ color: TEXT_COLOR, fontSize: '24px', marginBottom: '10px', textAlign: 'center' }}>Score: {score}</div>
-      <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT}
+      <canvas ref={canvasRef} width={dimensions.width} height={dimensions.height}
         style={{
           border: '1px solid white',
           touchAction: 'none', // Important for browser optimization and preventing default gestures
