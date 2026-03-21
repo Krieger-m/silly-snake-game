@@ -178,6 +178,60 @@ export default function SnakeGame() {
 
     document.addEventListener('keydown', handleKey);
 
+    // --- Touch Controls ---
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault(); // Prevent scrolling
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault(); // Prevent scrolling
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+      if (gameState.current.isGameOver) {
+        restartGame();
+        return;
+      }
+
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const dx = touchEndX - touchStartX;
+      const dy = touchEndY - touchStartY;
+
+      // Detect Tap (short distance) -> Toggle Pause
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+        gameState.current.isPaused = !gameState.current.isPaused;
+        if (!gameState.current.isPaused) {
+          lastUpdate = performance.now();
+          animationFrameId = requestAnimationFrame(gameLoop);
+        }
+        return;
+      }
+
+      if (gameState.current.isPaused) return;
+
+      const { direction } = gameState.current;
+      // Horizontal Swipe
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0 && direction.x === 0) gameState.current.direction = { x: 1, y: 0 };
+        else if (dx < 0 && direction.x === 0) gameState.current.direction = { x: -1, y: 0 };
+      } else {
+        // Vertical Swipe
+        if (dy > 0 && direction.y === 0) gameState.current.direction = { x: 0, y: 1 };
+        else if (dy < 0 && direction.y === 0) gameState.current.direction = { x: 0, y: -1 };
+      }
+    };
+
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd);
+
     const gameLoop = (timestamp: number) => {
       if (gameState.current.isGameOver) {
         drawGameOverScreen();
@@ -209,6 +263,9 @@ export default function SnakeGame() {
 
     return () => {
       document.removeEventListener('keydown', handleKey);
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -219,6 +276,7 @@ export default function SnakeGame() {
       <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT}
         style={{
           border: '1px solid white',
+          touchAction: 'none', // Important for browser optimization and preventing default gestures
         }}></canvas>
         <br />
         <br />
