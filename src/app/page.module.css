@@ -137,7 +137,7 @@ a.secondary {
   }
 
   .buttonLink:hover {
-    background: var(--button-secondary-hover);
+    background: #585858;
   }
 
   .footer a:hover {
