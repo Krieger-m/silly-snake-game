@@ -1,0 +1,18 @@
+.scoreList{
+    display: flex;
+    flex-direction: column;
+    width: 200;
+}
+
+.scoreItem{
+    display: flex;
+    flex-direction: row;
+    width: 200;
+    justify-content: space-between;
+}
+
+.nameItem{
+    display: flex;
+    flex-direction: row;
+    gap: 20;
+}
