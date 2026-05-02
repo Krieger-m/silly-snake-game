@@ -1,5 +1,6 @@
 
 import HighScoreList from "../_components/HighscoreList";
+import { Spacing } from "../_components/Spacing";
 import styles from "../page.module.css";
 import Link from "next/link";
 
@@ -16,10 +17,7 @@ export default function MainPage() {
       <Link href={"/game"} className={styles.buttonLink}>
         New Game
       </Link>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
+<Spacing height={4}/>
       <Link href={"/"} className={styles.buttonLink}>
         Back
       </Link>

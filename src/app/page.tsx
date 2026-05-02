@@ -1,8 +1,8 @@
-
 import { seedUsers } from "@/lib/seed";
 import styles from "./page.module.css";
 import Link from "next/link";
 import { getUsers, insertUser } from "@/lib/actions";
+import { Spacing } from "./_components/Spacing";
 
 export default async function MainPage() {
   // seedUsers()
@@ -13,24 +13,20 @@ export default async function MainPage() {
   // console.log(res)
 
   return (
-    <div
-      className={`${styles.page} ${styles.centerContent}`}
-    >
+    <div className={`${styles.page} ${styles.centerContent}`}>
       <h1>~ Snake-Game ~</h1>
-      <br/>
+      <Spacing height={4} />
+
       <p>press the new game button to play</p>
       <Link href={"/game"} className={styles.buttonLink}>
         New Game
       </Link>
-      <br/>
+      <Spacing height={1} />
       <p>view the highscore list</p>
       <Link href={"/highscore"} className={styles.buttonLink}>
         Highscore
       </Link>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
+      <Spacing height={4} />
       <a href={"https://mk-dev.org/projects"} className={styles.buttonLink}>
         Back
       </a>
