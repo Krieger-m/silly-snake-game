@@ -14,11 +14,11 @@ export async function seedUsers() {
 
   // Seed data
   const seedData = [
-    { id: 1, username: "Alice", score: 120 },
-    { id: 2, username: "Bob", score: 95 },
-    { id: 3, username: "Charlie", score: 150 },
-    { id: 4, username: "Diana", score: 80 },
-    { id: 5, username: "Eve", score: 200 },
+    { id: 1, username: "Alice", score: 12 },
+    { id: 2, username: "Bob", score: 9 },
+    { id: 3, username: "Charlie", score: 15 },
+    { id: 4, username: "Diana", score: 8 },
+    { id: 5, username: "Eve", score: 20 },
   ];
 
   const insert = db.prepare(`

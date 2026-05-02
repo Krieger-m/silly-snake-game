@@ -7,7 +7,7 @@ import { getUsers, insertUser } from "@/lib/actions";
 export default async function MainPage() {
   // seedUsers()
 
-  // const a = await insertUser('Peter', 15)
+  // const a = await insertUser('Peter', 5)
 
   // const res = await getUsers()
   // console.log(res)
