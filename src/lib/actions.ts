@@ -8,11 +8,11 @@ export async function getUsers() {
   return stmt.all();
 }
 
-export async function insertUser(id: number, name: string, s: number) {
-  const newUser = { id: id, username: name, score: s };
+export async function insertUser(name: string, s: number) {
+  const newUser = { username: name, score: s };
   const insert = db.prepare(`
-    INSERT OR REPLACE INTO users (id, username, score)
-    VALUES (@id, @username, @score)
+    INSERT OR REPLACE INTO users (username, score)
+    VALUES (@username, @score)
   `);
 
   const transaction = db.transaction((user) => {

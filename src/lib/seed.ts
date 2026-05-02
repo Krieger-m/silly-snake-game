@@ -6,7 +6,7 @@ export async function seedUsers() {
   // Create table if it doesn't exist
   db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL,
       score INTEGER NOT NULL
     )
