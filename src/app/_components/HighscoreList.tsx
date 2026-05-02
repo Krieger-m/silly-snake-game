@@ -18,7 +18,7 @@ export default async function HighScoreList() {
         {(users as UserProps[]).map((user: UserProps, key: number) => (
           <div key={key} className={styles.scoreItem}>
             <div className={styles.nameItem}>
-              <p style={{ width: 15 }}>{key + 1}.</p> <p>{user.username}:</p>
+              <p style={{ width: 15 }}>{key + 1}.</p> <p>{user.username}</p>
             </div>{" "}
             <p>{user.score}</p>
           </div>
