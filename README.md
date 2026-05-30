@@ -14,7 +14,8 @@ you can try it out here: [Silly-Snake-Game](https://snake.mk-dev.org/)
 - Pause the game anytime using **SPACE**  
 - Highscore list stored in **SQLite**  
 - Responsive and lightweight  
-- Runs entirely in the browser  
+- Runs entirely in the browser
+- Supports touch control 
 
 ---
 
@@ -24,13 +25,13 @@ you can try it out here: [Silly-Snake-Game](https://snake.mk-dev.org/)
 - **TypeScript**  
 - **SQLite**  
 - **CSS Modules**
-
+  
 ---
-
+  
 ## 📁 Project Structure
-
+  
 Based on the repository layout visible in your GitHub tree:
-
+  
 ```
 public/
 src/
