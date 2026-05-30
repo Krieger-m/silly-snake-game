@@ -4,6 +4,7 @@ A small Snake game I built to practice **Next.js**, **TypeScript**, and working 
 It started as a practice project, now it’s a fully working browser game with a persistent (currently under construction) high‑score system.
 
 you can try it out here: [Silly-Snake-Game](https://snake.mk-dev.org/)
+  
 ---
 
 ## 🎮 Features
