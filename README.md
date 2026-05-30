@@ -29,7 +29,7 @@ It started as a practice project — now it’s a fully working browser game wit
 
 Based on the repository layout visible in your GitHub tree:
 
-Code
+```
 public/
 src/
   app/
@@ -50,6 +50,7 @@ tsconfig.json
 next.config.ts
 eslint.config.mjs
 README.md
+```
   
 ## 🚀 Getting Started
 
