@@ -41,7 +41,10 @@ src/
     layout.tsx
     page.module.css
     page.tsx
-lib/
+  lib/
+    actions.ts
+    data.ts
+    seed.ts
 data.sqlite
 data.sqlite-shm
 data.sqlite-wal
@@ -55,32 +58,35 @@ README.md
 ## 🚀 Getting Started
 
 Clone the repo:
-
-bash
+```bash
 git clone https://github.com/Krieger-m/silly-snake-game
 cd silly-snake-game
+```
 Install dependencies:
-
-bash
+```bash
 npm install
+```
 Start the development server:
-
-bash
+```bash
 npm run dev
+```
 Then open:
-
-Code
+```
 http://localhost:3000
-🗄️ Database
+```
+  
+## 🗄️ Database
 The project uses a small SQLite database (data.sqlite) to store highscores.
 It initializes automatically on first run — no manual setup required.
 
-📦 Deployment
+## 📦 Deployment
 This project can run in any Node.js environment.
 Build and start:
 
-bash
+```bash
 npm run build
 npm start
-📝 License
+```
+  
+## 📝 License
 MIT — feel free to use, modify, or build on it.
