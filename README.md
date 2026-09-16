@@ -7,7 +7,7 @@ you can try it out here: [Silly-Snake-Game](https://snake.mk-dev.org/)
   
 ---
 
-## 🎮 Features
+## Features
 
 - Classic Snake gameplay  
 - Clean UI with *New Game*, *Pause*, and *Highscore* views  
@@ -19,7 +19,7 @@ you can try it out here: [Silly-Snake-Game](https://snake.mk-dev.org/)
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 
 - **Next.js**  
 - **TypeScript**  
@@ -28,7 +28,7 @@ you can try it out here: [Silly-Snake-Game](https://snake.mk-dev.org/)
   
 ---
   
-## 📁 Project Structure
+## Project Structure
   
 Based on the repository layout visible in your GitHub tree:
   
@@ -58,7 +58,7 @@ eslint.config.mjs
 README.md
 ```
   
-## 🚀 Getting Started
+## Getting Started
 
 Clone the repo:
 ```bash
@@ -78,11 +78,11 @@ Then open:
 http://localhost:3010
 ```
   
-## 🗄️ Database
+## Database
 The project uses a small SQLite database (data.sqlite) to store highscores.
 It initializes automatically on first run — no manual setup required.
 
-## 📦 Deployment
+## Deployment
 This project can run in any Node.js environment.
 Build and start:
 
@@ -91,5 +91,5 @@ npm run build
 npm start
 ```
   
-## 📝 License
+## License
 MIT — feel free to use, modify, or build on it.
