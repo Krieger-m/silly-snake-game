@@ -30,7 +30,6 @@ you can try it out here: [Silly-Snake-Game](https://snake.mk-dev.org/)
   
 ## Project Structure
   
-Based on the repository layout visible in your GitHub tree:
   
 ```
 public/
