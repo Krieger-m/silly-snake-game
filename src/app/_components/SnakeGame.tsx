@@ -473,7 +473,7 @@ export default function SnakeGame() {
         </div>
       )}
 
-      {leaderboard.length > 0 && (
+      {/* {leaderboard.length > 0 && (
         <div
           style={{
             marginTop: "20px",
@@ -500,7 +500,7 @@ export default function SnakeGame() {
             </div>
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 }
