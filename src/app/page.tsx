@@ -1,4 +1,3 @@
-import { seedUsers } from "@/lib/seed";
 import styles from "./page.module.css";
 import Link from "next/link";
 import { getUsers, insertUser } from "@/lib/actions";
