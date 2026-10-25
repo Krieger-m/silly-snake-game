@@ -1,33 +1,41 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useRef } from "react";
+import { canSubmitHighScore, getUsers, submitHighScore } from "@/lib/actions";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
-// --- Constants ---
 const GRID_SIZE = 20;
 const DEFAULT_CANVAS_WIDTH = 640;
 const DEFAULT_CANVAS_HEIGHT = 480;
-const GAME_SPEED = 5; // cells per second
+const GAME_SPEED = 5;
 
-const SNAKE_COLOR_START = '#9cb3c9';
-const SNAKE_COLOR_END = '#104e8b';
-const FOOD_COLOR = '#58d163';
-const TEXT_COLOR = 'white';
-const PAUSE_OVERLAY_COLOR = 'rgba(0, 0, 0, 0.5)';
-const GAMEOVER_OVERLAY_COLOR = 'rgba(0, 0, 0, 0.7)';
+const SNAKE_COLOR_START = "#9cb3c9";
+const SNAKE_COLOR_END = "#104e8b";
+const FOOD_COLOR = "#58d163";
+const TEXT_COLOR = "white";
+const PAUSE_OVERLAY_COLOR = "rgba(0, 0, 0, 0.5)";
+const GAMEOVER_OVERLAY_COLOR = "rgba(0, 0, 0, 0.7)";
+const FONT_LARGE = "40px Arial";
+const FONT_MEDIUM = "20px Arial";
 
-const FONT_LARGE = '40px Arial';
-const FONT_MEDIUM = '20px Arial';
-
-// --- Types ---
 type Point = { x: number; y: number };
 type Direction = { x: -1 | 0 | 1; y: -1 | 0 | 1 };
+type LeaderboardEntry = { username: string; score: number };
 
 export default function SnakeGame() {
   const [score, setScore] = useState(0);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [dimensions, setDimensions] = useState({ width: DEFAULT_CANVAS_WIDTH, height: DEFAULT_CANVAS_HEIGHT });
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [playerName, setPlayerName] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Use refs for mutable game state that shouldn't trigger re-renders.
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gameOverHandledRef = useRef(false);
+  const [dimensions, setDimensions] = useState({
+    width: DEFAULT_CANVAS_WIDTH,
+    height: DEFAULT_CANVAS_HEIGHT,
+  });
+
   const gameState = useRef({
     snake: [{ x: 160, y: 160 }] as Point[],
     direction: { x: 1, y: 0 } as Direction,
@@ -36,18 +44,47 @@ export default function SnakeGame() {
     isGameOver: false,
   });
 
+  const refreshLeaderboard = async () => {
+    const users = await getUsers();
+    setLeaderboard(users as LeaderboardEntry[]);
+  };
+
+  const submitScore = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const trimmed = playerName.trim();
+    if (!trimmed) {
+      setNameError("Please enter your name.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const result = await submitHighScore(trimmed, score);
+    setLeaderboard((result.users as LeaderboardEntry[]) ?? []);
+    setShowNamePrompt(false);
+    setPlayerName("");
+    setNameError("");
+    setIsSubmitting(false);
+  };
+
+  useEffect(() => {
+    refreshLeaderboard();
+  }, []);
+
   useEffect(() => {
     const handleResize = () => {
-      const isMobile = window.innerWidth < 768; // Mobile breakpoint
+      const isMobile = window.innerWidth < 768;
+
       if (isMobile) {
-        // Narrower width, larger height for mobile
-        let newWidth = Math.min(window.innerWidth - 32, 400); // Leave some margin
-        // Snap to grid
+        let newWidth = Math.min(window.innerWidth - 32, 400);
         newWidth = Math.floor(newWidth / GRID_SIZE) * GRID_SIZE;
 
-        // Use ~65% of screen height or at least 500px, but don't exceed reasonable max
-        let newHeight = Math.max(Math.floor((window.innerHeight * 0.65) / GRID_SIZE) * GRID_SIZE, 500);
-        newHeight = Math.min(newHeight, 800); // Cap height
+        let newHeight = Math.max(
+          Math.floor((window.innerHeight * 0.65) / GRID_SIZE) * GRID_SIZE,
+          500,
+        );
+        newHeight = Math.min(newHeight, 800);
 
         setDimensions({ width: newWidth, height: newHeight });
       } else {
@@ -55,15 +92,16 @@ export default function SnakeGame() {
       }
     };
 
-    handleResize(); // Initial check
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     let lastUpdate = 0;
@@ -79,16 +117,15 @@ export default function SnakeGame() {
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw food
       ctx.fillStyle = FOOD_COLOR;
       ctx.fillRect(gameState.current.food.x, gameState.current.food.y, GRID_SIZE, GRID_SIZE);
 
-      // Draw snake
       const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
       gradient.addColorStop(0, SNAKE_COLOR_START);
       gradient.addColorStop(1, SNAKE_COLOR_END);
       ctx.fillStyle = gradient;
-      gameState.current.snake.forEach(segment => {
+
+      gameState.current.snake.forEach((segment) => {
         ctx.fillRect(segment.x, segment.y, GRID_SIZE, GRID_SIZE);
       });
     };
@@ -98,9 +135,9 @@ export default function SnakeGame() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = TEXT_COLOR;
       ctx.font = FONT_LARGE;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('Paused', canvas.width / 2, canvas.height / 2);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Paused", canvas.width / 2, canvas.height / 2);
     };
 
     const drawGameOverScreen = () => {
@@ -108,18 +145,21 @@ export default function SnakeGame() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = TEXT_COLOR;
       ctx.font = FONT_LARGE;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 40);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2 - 40);
       ctx.font = FONT_MEDIUM;
       ctx.fillText(`Final Score: ${currentScore}`, canvas.width / 2, canvas.height / 2);
-      ctx.fillText('Press Enter to Restart', canvas.width / 2, canvas.height / 2 + 40);
+      ctx.fillText("Press Enter to Restart", canvas.width / 2, canvas.height / 2 + 40);
     };
 
     const restartGame = () => {
-      // Start in the center
       const startX = Math.floor(canvas.width / 2 / GRID_SIZE) * GRID_SIZE;
       const startY = Math.floor(canvas.height / 2 / GRID_SIZE) * GRID_SIZE;
+
+      gameOverHandledRef.current = false;
+      setShowNamePrompt(false);
+      setNameError("");
 
       gameState.current = {
         snake: [{ x: startX, y: startY }],
@@ -128,10 +168,12 @@ export default function SnakeGame() {
         isPaused: false,
         isGameOver: false,
       };
+
       currentScore = 0;
       setScore(0);
       lastUpdate = 0;
       moveAccumulator = 0;
+
       animationFrameId = requestAnimationFrame(gameLoop);
     };
 
@@ -141,22 +183,26 @@ export default function SnakeGame() {
         x: snake[0].x + direction.x * GRID_SIZE,
         y: snake[0].y + direction.y * GRID_SIZE,
       };
+
       snake.unshift(head);
 
-      // Eat food
       if (head.x === food.x && head.y === food.y) {
-        currentScore++;
+        currentScore += 1;
         setScore(currentScore);
         gameState.current.food = getRandomFoodPosition();
       } else {
         snake.pop();
       }
 
-      // Collision
-      const selfCollision = snake.slice(1).some(seg => seg.x === head.x && seg.y === head.y);
+      const selfCollision = snake.slice(1).some(
+        (seg) => seg.x === head.x && seg.y === head.y,
+      );
+
       if (
-        head.x < 0 || head.x >= canvas.width ||
-        head.y < 0 || head.y >= canvas.height ||
+        head.x < 0 ||
+        head.x >= canvas.width ||
+        head.y < 0 ||
+        head.y >= canvas.height ||
         selfCollision
       ) {
         gameState.current.isGameOver = true;
@@ -168,61 +214,81 @@ export default function SnakeGame() {
     const handleKey = (e: KeyboardEvent) => {
       const { isGameOver, isPaused, direction } = gameState.current;
 
+      if (showNamePrompt) return;
+
       if (isGameOver) {
-        if (e.key === 'Enter') restartGame();
+        if (e.key === "Enter") restartGame();
         return;
       }
-      // Toggle pause state with Space or 'p' key
-      if (e.key === ' ' || e.key.toLowerCase() === 'p') {
-        e.preventDefault(); // Prevent spacebar from scrolling the page
+
+      if (e.key === " " || e.key.toLowerCase() === "p") {
+        e.preventDefault();
         gameState.current.isPaused = !isPaused;
+
         if (!gameState.current.isPaused) {
-          // To avoid a large jump in time when unpausing
           lastUpdate = performance.now();
           animationFrameId = requestAnimationFrame(gameLoop);
         }
+
         return;
       }
 
-      // Ignore movement keys if the game is paused
       if (isPaused) return;
 
       let newDirection = direction;
+
       switch (e.key) {
-        case 'ArrowUp':
+        case "ArrowUp":
           if (direction.y === 0) newDirection = { x: 0, y: -1 };
           break;
-        case 'ArrowDown':
+        case "ArrowDown":
           if (direction.y === 0) newDirection = { x: 0, y: 1 };
           break;
-        case 'ArrowLeft':
+        case "ArrowLeft":
           if (direction.x === 0) newDirection = { x: -1, y: 0 };
           break;
-        case 'ArrowRight':
+        case "ArrowRight":
           if (direction.x === 0) newDirection = { x: 1, y: 0 };
           break;
       }
+
       gameState.current.direction = newDirection;
     };
 
-    document.addEventListener('keydown', handleKey);
+    const handleGameOver = async (finalScore: number) => {
+      if (gameOverHandledRef.current) return;
+      gameOverHandledRef.current = true;
 
-    // --- Touch Controls ---
+      const qualifies = await canSubmitHighScore(finalScore);
+
+      if (qualifies) {
+        setPlayerName("");
+        setNameError("");
+        setShowNamePrompt(true);
+        return;
+      }
+
+      await refreshLeaderboard();
+    };
+
+    document.addEventListener("keydown", handleKey);
+
     let touchStartX = 0;
     let touchStartY = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
-      e.preventDefault(); // Prevent scrolling
+      e.preventDefault();
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault(); // Prevent scrolling
+      e.preventDefault();
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
       e.preventDefault();
+
       if (gameState.current.isGameOver) {
         restartGame();
         return;
@@ -233,7 +299,6 @@ export default function SnakeGame() {
       const dx = touchEndX - touchStartX;
       const dy = touchEndY - touchStartY;
 
-      // Detect Tap (short distance) -> Toggle Pause
       if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
         gameState.current.isPaused = !gameState.current.isPaused;
         if (!gameState.current.isPaused) {
@@ -246,36 +311,37 @@ export default function SnakeGame() {
       if (gameState.current.isPaused) return;
 
       const { direction } = gameState.current;
-      // Horizontal Swipe
+
       if (Math.abs(dx) > Math.abs(dy)) {
         if (dx > 0 && direction.x === 0) gameState.current.direction = { x: 1, y: 0 };
         else if (dx < 0 && direction.x === 0) gameState.current.direction = { x: -1, y: 0 };
       } else {
-        // Vertical Swipe
         if (dy > 0 && direction.y === 0) gameState.current.direction = { x: 0, y: 1 };
         else if (dy < 0 && direction.y === 0) gameState.current.direction = { x: 0, y: -1 };
       }
     };
 
-    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-    canvas.addEventListener('touchend', handleTouchEnd);
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    canvas.addEventListener("touchend", handleTouchEnd);
 
     const gameLoop = (timestamp: number) => {
       if (gameState.current.isGameOver) {
+        if (!gameOverHandledRef.current) {
+          void handleGameOver(currentScore);
+        }
+
         drawGameOverScreen();
-        // Stop the game loop
         return;
       }
 
       if (gameState.current.isPaused) {
         drawPausedScreen();
-        // Stop the game loop until unpaused
         return;
       }
 
       if (!lastUpdate) lastUpdate = timestamp;
-      const delta = (timestamp - lastUpdate) / 1000; // seconds
+      const delta = (timestamp - lastUpdate) / 1000;
       lastUpdate = timestamp;
 
       moveAccumulator += delta;
@@ -287,29 +353,150 @@ export default function SnakeGame() {
       animationFrameId = requestAnimationFrame(gameLoop);
     };
 
-    // Initialize/Restart on mount or dimension change
     restartGame();
 
     return () => {
-      document.removeEventListener('keydown', handleKey);
-      canvas.removeEventListener('touchstart', handleTouchStart);
-      canvas.removeEventListener('touchmove', handleTouchMove);
-      canvas.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener("keydown", handleKey);
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      canvas.removeEventListener("touchend", handleTouchEnd);
+
       cancelAnimationFrame(animationFrameId);
     };
   }, [dimensions]);
 
   return (
     <div>
-      <div style={{ color: TEXT_COLOR, fontSize: '24px', marginBottom: '10px', textAlign: 'center' }}>Score: {score}</div>
-      <canvas ref={canvasRef} width={dimensions.width} height={dimensions.height}
+      <div
         style={{
-          border: '1px solid white',
-          touchAction: 'none', // Important for browser optimization and preventing default gestures
-        }}></canvas>
-        <br />
-        <br />
-        <p style={{ textAlign: 'center', color: TEXT_COLOR }}>press SPACE to pause</p>
+          color: TEXT_COLOR,
+          fontSize: "24px",
+          marginBottom: "10px",
+          textAlign: "center",
+        }}
+      >
+        Score: {score}
+      </div>
+
+      <canvas
+        ref={canvasRef}
+        width={dimensions.width}
+        height={dimensions.height}
+        style={{
+          border: "1px solid white",
+          touchAction: "none",
+        }}
+      />
+
+      <div style={{ textAlign: "center", marginTop: "12px" }}>
+        <p style={{ color: TEXT_COLOR }}>press SPACE to pause</p>
+      </div>
+
+      {showNamePrompt && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.7)",
+            display: "grid",
+            placeItems: "center",
+            zIndex: 10,
+          }}
+        >
+          <form
+            onSubmit={submitScore}
+            style={{
+              background: "#0f172a",
+              border: "1px solid #cbd5e1",
+              borderRadius: "12px",
+              padding: "20px",
+              width: "min(90vw, 320px)",
+              color: TEXT_COLOR,
+            }}
+          >
+            <h3 style={{ marginTop: 0, textAlign: "center" }}>New Highscore!</h3>
+            <p style={{ textAlign: "center", marginBottom: "12px" }}>
+              You scored {score} points.
+            </p>
+
+            <label
+              htmlFor="player-name"
+              style={{ display: "block", marginBottom: "8px" }}
+            >
+              Enter your name
+            </label>
+
+            <input
+              id="player-name"
+              value={playerName}
+              onChange={(event) => {
+                setPlayerName(event.target.value);
+                if (nameError) setNameError("");
+              }}
+              placeholder="Player"
+              autoFocus
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: "8px",
+                border: "1px solid #64748b",
+                marginBottom: "10px",
+                boxSizing: "border-box",
+              }}
+            />
+
+            {nameError && (
+              <p style={{ color: "#fca5a5", margin: "0 0 8px" }}>{nameError}</p>
+            )}
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                style={{
+                  background: "#16a34a",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "10px 16px",
+                  cursor: isSubmitting ? "not-allowed" : "pointer",
+                }}
+              >
+                {isSubmitting ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {leaderboard.length > 0 && (
+        <div
+          style={{
+            marginTop: "20px",
+            maxWidth: "320px",
+            marginInline: "auto",
+            color: TEXT_COLOR,
+          }}
+        >
+          <h3 style={{ textAlign: "center", marginBottom: "8px" }}>Highscores</h3>
+          {leaderboard.map((entry, index) => (
+            <div
+              key={`${entry.username}-${index}`}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                borderBottom: "1px solid rgba(255,255,255,0.2)",
+                padding: "6px 0",
+              }}
+            >
+              <span>
+                {index + 1}. {entry.username}
+              </span>
+              <strong>{entry.score}</strong>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
