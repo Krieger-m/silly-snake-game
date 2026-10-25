@@ -2,11 +2,13 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import { getUsers, insertUser } from "@/lib/actions";
 import { Spacing } from "./_components/Spacing";
+import { seedUsers } from "@/lib/seed";
 
 export default async function MainPage() {
   // seedUsers()
 
-  // const a = await insertUser('Peter', 5)
+  // const a = await insertUser('Peter', 7)
+  // const b = await insertUser('Laura', 7)
 
   // const res = await getUsers()
   // console.log(res)
