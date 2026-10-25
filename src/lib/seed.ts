@@ -18,7 +18,7 @@ export async function seedUsers() {
     { id: 2, username: "Bob", score: 9 },
     { id: 3, username: "Charlie", score: 15 },
     { id: 4, username: "Diana", score: 8 },
-    { id: 5, username: "Eve", score: 20 },
+    { id: 5, username: "Dave", score: 20 },
   ];
 
   const insert = db.prepare(`
