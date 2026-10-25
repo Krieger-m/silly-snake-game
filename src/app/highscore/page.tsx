@@ -3,6 +3,8 @@ import { Spacing } from "../_components/Spacing";
 import styles from "../page.module.css";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default function MainPage() {
   return (
     <div className={`${styles.page} ${styles.centerContent}`}>
