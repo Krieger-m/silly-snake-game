@@ -88,7 +88,10 @@ export default function SnakeGame() {
 
         setDimensions({ width: newWidth, height: newHeight });
       } else {
-        setDimensions({ width: DEFAULT_CANVAS_WIDTH, height: DEFAULT_CANVAS_HEIGHT });
+        setDimensions({
+          width: DEFAULT_CANVAS_WIDTH,
+          height: DEFAULT_CANVAS_HEIGHT,
+        });
       }
     };
 
@@ -118,9 +121,19 @@ export default function SnakeGame() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       ctx.fillStyle = FOOD_COLOR;
-      ctx.fillRect(gameState.current.food.x, gameState.current.food.y, GRID_SIZE, GRID_SIZE);
+      ctx.fillRect(
+        gameState.current.food.x,
+        gameState.current.food.y,
+        GRID_SIZE,
+        GRID_SIZE,
+      );
 
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      const gradient = ctx.createLinearGradient(
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
       gradient.addColorStop(0, SNAKE_COLOR_START);
       gradient.addColorStop(1, SNAKE_COLOR_END);
       ctx.fillStyle = gradient;
@@ -149,8 +162,16 @@ export default function SnakeGame() {
       ctx.textBaseline = "middle";
       ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2 - 40);
       ctx.font = FONT_MEDIUM;
-      ctx.fillText(`Final Score: ${currentScore}`, canvas.width / 2, canvas.height / 2);
-      ctx.fillText("Press Enter to Restart", canvas.width / 2, canvas.height / 2 + 40);
+      ctx.fillText(
+        `Final Score: ${currentScore}`,
+        canvas.width / 2,
+        canvas.height / 2,
+      );
+      ctx.fillText(
+        "Press Enter to Restart",
+        canvas.width / 2,
+        canvas.height / 2 + 40,
+      );
     };
 
     const restartGame = () => {
@@ -194,9 +215,9 @@ export default function SnakeGame() {
         snake.pop();
       }
 
-      const selfCollision = snake.slice(1).some(
-        (seg) => seg.x === head.x && seg.y === head.y,
-      );
+      const selfCollision = snake
+        .slice(1)
+        .some((seg) => seg.x === head.x && seg.y === head.y);
 
       if (
         head.x < 0 ||
@@ -317,11 +338,15 @@ export default function SnakeGame() {
       const { direction } = gameState.current;
 
       if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 0 && direction.x === 0) gameState.current.direction = { x: 1, y: 0 };
-        else if (dx < 0 && direction.x === 0) gameState.current.direction = { x: -1, y: 0 };
+        if (dx > 0 && direction.x === 0)
+          gameState.current.direction = { x: 1, y: 0 };
+        else if (dx < 0 && direction.x === 0)
+          gameState.current.direction = { x: -1, y: 0 };
       } else {
-        if (dy > 0 && direction.y === 0) gameState.current.direction = { x: 0, y: 1 };
-        else if (dy < 0 && direction.y === 0) gameState.current.direction = { x: 0, y: -1 };
+        if (dy > 0 && direction.y === 0)
+          gameState.current.direction = { x: 0, y: 1 };
+        else if (dy < 0 && direction.y === 0)
+          gameState.current.direction = { x: 0, y: -1 };
       }
     };
 
@@ -410,15 +435,17 @@ export default function SnakeGame() {
           <form
             onSubmit={submitScore}
             style={{
-              background: "#0f172a",
-              border: "1px solid #cbd5e1",
+              background: "#1a1a1a",
+              border: "1px solid #cccccc",
               borderRadius: "12px",
               padding: "20px",
               width: "min(90vw, 320px)",
               color: TEXT_COLOR,
             }}
           >
-            <h3 style={{ marginTop: 0, textAlign: "center" }}>New Highscore!</h3>
+            <h3 style={{ marginTop: 0, textAlign: "center" }}>
+              New Highscore!
+            </h3>
             <p style={{ textAlign: "center", marginBottom: "12px" }}>
               You scored {score} points.
             </p>
@@ -443,24 +470,26 @@ export default function SnakeGame() {
                 width: "100%",
                 padding: "10px 12px",
                 borderRadius: "8px",
-                border: "1px solid #64748b",
+                border: "1px solid #ccc",
                 marginBottom: "10px",
                 boxSizing: "border-box",
               }}
             />
 
             {nameError && (
-              <p style={{ color: "#fca5a5", margin: "0 0 8px" }}>{nameError}</p>
+              <p style={{ color: "#db1313", margin: "0 0 8px" }}>{nameError}</p>
             )}
 
-            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+            <div
+              style={{ display: "flex", gap: "10px", justifyContent: "center" }}
+            >
               <button
                 type="submit"
                 disabled={isSubmitting}
                 style={{
-                  background: "#16a34a",
+                  background: "#0c5a29",
                   color: "white",
-                  border: "none",
+                  border: "1px solid #ccc",
                   borderRadius: "8px",
                   padding: "10px 16px",
                   cursor: isSubmitting ? "not-allowed" : "pointer",
